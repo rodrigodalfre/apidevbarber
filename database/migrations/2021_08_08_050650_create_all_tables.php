@@ -69,6 +69,7 @@ class CreateAllTables extends Migration
             $table->text('hours');
         });
         
+        
     }
 
     /**
