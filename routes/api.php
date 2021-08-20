@@ -19,6 +19,8 @@ use App\Http\Controllers\AuthController;
 |
 */
 
+Route::get('/random', [BarberController::class, 'random']);
+
 Route::get('/401', [AuthController::class, 'unauthorized'])->name('login');
 
 Route::post('/auth/login', [AuthController::class, 'login']);
