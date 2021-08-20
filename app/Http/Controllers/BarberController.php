@@ -24,6 +24,7 @@ class BarberController extends Controller
         $this->loggedUser = auth()->user();
     }
 
+    /*
     public function random(){
         $array = ['error' => ''];
 
@@ -101,4 +102,33 @@ class BarberController extends Controller
         }
         return $array;
     }
+    */
+
+    public function list () {
+        $array = ['error' => ''];
+
+        $barbers = Barber::all();
+        $array['data'] = $barbers;
+
+        foreach($barbers as $barber => $item){
+            $barbers[$barber]['avatar'] = url('media/avatars/'.$barbers[$barber]['avatar']);
+        }
+
+        return $array;
+    }
+
+    public function one($id){
+        $array = ['error' => ''];
+
+        $barber = Barber::find($id);
+
+        if($barber){
+            $array['data'] = $barber;
+        } else {
+            $array['error'] = 'Barbeiro não encontrado';
+            return $array;
+        }
+        return $array;
+    }
+    
 }
