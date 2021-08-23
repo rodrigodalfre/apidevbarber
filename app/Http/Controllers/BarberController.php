@@ -123,11 +123,46 @@ class BarberController extends Controller
         $barber = Barber::find($id);
 
         if($barber){
+            $barber['avatar'] = url('media/avatars/'.$barber['avatar']);
             $array['data'] = $barber;
+        
         } else {
             $array['error'] = 'Barbeiro não encontrado';
             return $array;
         }
+        return $array;
+    }
+
+    public function addFavorite(Request $request, $id){
+        $array = ['error' => ''];
+        
+        $barber = Barber::find($id);
+        $idUser = $this->loggedUser->id;
+
+        if($barber){
+
+            $barber['avatar'] = url('media/avatars/'.$barber['avatar']);
+            $barber['favorited'] = false;
+            $barber['photos'] = [];
+            $barber['services'] = [];
+            $barber['feedback'] = [];
+            $barber['available'] = [];
+
+            //Favorite
+            $favorite = UserFavorite::where($idUser, 'id_user')
+                ->where($barber, 'id_barber')
+                ->count();
+
+            if($favorite > 0) {
+                $barber['favorited'] = true;
+            }
+
+        } else {
+            $array['error'] = 'Barbeiro não encontrado';
+            return $array;
+        }
+
+
         return $array;
     }
     

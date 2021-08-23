@@ -33,9 +33,10 @@ Route::get('/user', [UserController::class, 'read']);
 Route::put('/user', [UserController::class, 'update']);
 Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
 Route::get('/user/favorites', [UserController::class, 'getFavorites']);
+Route::post('/user/favorite', [UserController::class, 'addFavorite']);
 Route::get('/user/appointments', [UserController::class, 'getAppointments']);
 
 Route::get('/barbers', [BarberController::class, 'list']);
 Route::get('/barber/{id}', [BarberController::class, 'one']);
 Route::post('/barber/{id}/appointments', [BarberController::class, 'setAppointment']);
-Route::post('/barber/{id}/favorite', [BarberController::class, 'addFavorite']);
+

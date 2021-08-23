@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
+use App\Models\Barber;
+use App\Models\UserFavorite;
 
 class UserController extends Controller
 {
@@ -71,6 +73,51 @@ class UserController extends Controller
         
         $user->save();
 
+        return $array;
+    }
+
+    public function addFavorite(Request $request){
+        $array = ['error' => ''];
+
+        $id_barber = $request->input('barber');
+
+        $barber = Barber::find($id_barber);
+
+        if($barber){
+            $favorite = UserFavorite::select()
+                ->where('id_barber', $id_barber)
+                ->where('id_user', $this->loggedUser->id)
+            ->first();
+                
+            if(!$favorite){
+                $newFav = new UserFavorite();
+                $newFav->id_user = $this->loggedUser->id;
+                $newFav->id_barber = $id_barber;
+                $newFav->save();
+                $array['favorited'] = true;
+                
+            } else{
+                $favorite->delete();
+                $array['favorited'] = false;
+            }
+        } else {
+            $array['error'] = 'Barbeiro não encontrado';
+        }
+        return $array;
+    }
+
+    public function getFavorites(){
+        $array = ['error' => ''];
+
+        $favorites = UserFavorite::where('id_user', $this->loggedUser->id)->get();
+        
+        if($favorites){
+            foreach($favorites as $fav){
+                $barber = Barber::find($fav['id_barber']);
+                $barber['avatar'] = url('media/avatars/'.$barber['avatar']);
+                $array['list'][] = $barber;
+            }
+        }
         return $array;
     }
 

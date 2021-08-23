@@ -39,7 +39,6 @@ class AuthController extends Controller
             $emailExits = User::where('email', $email)->count();
             if($emailExits === 0){
                 //Salvar o usuário
-
                 $hash = Hash::make($data['password']);
 
                 $newUser = new User();
