@@ -119,22 +119,6 @@ class BarberController extends Controller
 
     public function one($id){
         $array = ['error' => ''];
-
-        $barber = Barber::find($id);
-
-        if($barber){
-            $barber['avatar'] = url('media/avatars/'.$barber['avatar']);
-            $array['data'] = $barber;
-        
-        } else {
-            $array['error'] = 'Barbeiro não encontrado';
-            return $array;
-        }
-        return $array;
-    }
-
-    public function addFavorite(Request $request, $id){
-        $array = ['error' => ''];
         
         $barber = Barber::find($id);
         $idUser = $this->loggedUser->id;
@@ -149,13 +133,32 @@ class BarberController extends Controller
             $barber['available'] = [];
 
             //Favorite
-            $favorite = UserFavorite::where($idUser, 'id_user')
-                ->where($barber, 'id_barber')
+            $favorite = UserFavorite::where('id_user', $idUser)
+                ->where('id_barber', $barber)
                 ->count();
 
-            if($favorite > 0) {
-                $barber['favorited'] = true;
+            $favorite > 0 ? true : false;
+
+            //Services
+            $barber['services'] = BarberServices::select(['id', 'name', 'price'])
+                ->where('id_barber', $barber->id)
+            ->get();
+
+            //Feedback
+            $barber['feedback'] = BarberFeedback::select(['id', 'name', 'rate', 'body'])
+                ->where('id_barber', $barber->id)
+            ->get();
+
+            //Photos
+            $barber['photos'] = BarberPhoto::select(['id', 'url'])
+                ->where('id_barber', $barber->id)
+            ->get();
+
+            foreach($barber['photos'] as $bpkey => $bkvalue) {
+                $barber['photos'][$bpkey]['url'] = url('media/photos/'.$barber['photos'][$bpkey]['url']);
             }
+            
+            $array['data'] = $barber;
 
         } else {
             $array['error'] = 'Barbeiro não encontrado';
@@ -165,5 +168,5 @@ class BarberController extends Controller
 
         return $array;
     }
-    
+
 }
