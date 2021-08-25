@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
 use App\Models\Barber;
+use App\Models\BarberServices;
 use App\Models\UserFavorite;
+use App\Models\UserAppointment;
 
 class UserController extends Controller
 {
@@ -118,6 +120,36 @@ class UserController extends Controller
                 $array['list'][] = $barber;
             }
         }
+        return $array;
+    }
+
+    public function getAppointments(){
+        $array = ['error' => '', 'list' => []];
+
+        $apps = UserAppointment::select()
+            ->where('id_user', $this->loggedUser->id)
+            ->orderBy('ap_datetime', 'DESC')
+            ->get();
+
+        if($apps) {
+            foreach($apps as $app){
+                $barber = Barber::find($app['id_barber']);
+                $barber['avatar'] = url('media/avatars/'.$barber['avatar']);
+
+                $service = BarberServices::find($app['id_service']);
+
+                $array['list'][] = [
+                    'id' => $app['id'],
+                    'datetime' => $app['ap_datime'],
+                    'barber' => $barber,
+                    'service' => $service
+                ];
+            }
+        } else {
+            $array['error'] = 'Usuário não tem compromissos';
+            return $array;
+        }
+
         return $array;
     }
 

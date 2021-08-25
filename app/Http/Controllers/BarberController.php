@@ -222,9 +222,61 @@ class BarberController extends Controller
 
     public function setAppointment(Request $request, $id) {
         $array = ['error' => ''];
-
-
-
+        $service = $request->input('service');
+        $year = intval($request->input('year'));
+        $month = intval($request->input('month'));
+        $day = intval($request->input('day'));
+        $hour = intval($request->input('hour'));
+        $month = str_pad($month, 2, '0', STR_PAD_LEFT);
+        $day = str_pad($day, 2, '0', STR_PAD_LEFT);
+        $hour = str_pad($hour, 2, '0', STR_PAD_LEFT);
+        //verificar se o servico do barbeiro existe
+        $barberservice = BarberServices::where('id', $service)
+            ->where('id_barber', $id)
+            ->first();
+            if(!$barberservice) {
+                $array['error'] = 'Serviço inexistente';
+                return $array;
+            }
+            
+        //verificar se a data é real
+        $apDate = $year.'-'.$month.'-'.$day.' '.$hour.':00:00';
+        #echo $apDate;
+        if(!strtotime($apDate) > 0) {
+            $array['error'] = 'Data invalida!';
+            return $array;
+        }
+        //vefificar se o barbeiro ja possui agendamento nesta data/hora
+        $apps = UserAppointment::where('id_barber', $id)
+            ->where('ap_datetime', $apDate)
+            ->get();
+        if(count($apps) > 0) {
+            $array['error'] = 'Horário/dia indisponivel!';
+            return $array;
+        }
+        //verificar se o barbeiro atende nesta data
+        $weekDay = date('w', strtotime($apDate));
+        $avail = BarberAvailability::select()
+            ->where('id_barber', $id)
+            ->where('weekday', $weekDay)
+            ->first();
+            if(!$avail) {
+                $array['error'] = 'Barbeiro não atende neste dia!';
+                return $array;
+            }
+        //Verificar se o barbeiro atende nesta hora
+        $hours = explode(',', $avail['hours']);
+        if(!in_array($hour.':00', $hours)){
+            $array['error'] = 'Barbeiro não atende nesta hora!';
+            return $array;
+        }
+        //fazer o agendamento
+        $newApp = new UserAppointment();
+        $newApp->id_user = $this->loggedUser->id;
+        $newApp->id_barber = $id;
+        $newApp->id_service = $service;
+        $newApp->ap_datetime = $apDate;
+        $newApp->save();
         return $array;
     }
 
