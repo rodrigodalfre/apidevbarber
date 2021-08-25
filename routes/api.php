@@ -40,3 +40,4 @@ Route::get('/barbers', [BarberController::class, 'list']);
 Route::get('/barber/{id}', [BarberController::class, 'one']);
 Route::post('/barber/{id}/appointments', [BarberController::class, 'setAppointment']);
 
+Route::get('/search', [BarberController::class, 'search']);
