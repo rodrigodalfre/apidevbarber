@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Intervention\Image\Facades\Image;
 
 use App\Models\User;
 use App\Models\Barber;
@@ -149,6 +150,35 @@ class UserController extends Controller
             $array['error'] = 'Usuário não tem compromissos';
             return $array;
         }
+
+        return $array;
+    }
+
+    public function updateAvatar(Request $request){
+        $array = ['error' => ''];
+        #composer require intervention/image
+
+        $rules = [
+            'avatar' => 'required|image|mimes:png,jpg,jpeg'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if($validator->fails()){
+            $array['error'] = $validator->messages();
+            return $array;
+        }
+
+        $avatar = $request->file('avatar');
+
+        $dest = public_path('/media/avatars');
+        $avatarName = md5(time().mt_rand(0,9999)).'.jpg';
+
+        $img = Image::make($avatar->getRealPath());
+        $img->fit(300, 300)->save($dest.'/'.$avatarName);
+
+        $user = User::find($this->loggedUser->id);
+        $user->avatar = $avatarName;
+        $user->save();
 
         return $array;
     }
